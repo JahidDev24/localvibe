@@ -1,0 +1,11 @@
+# Ignore build/output artifacts
+
+# Ignore version metadata that should not be committed
+version.json
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+
