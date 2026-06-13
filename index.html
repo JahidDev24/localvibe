@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LocalVibe — your Wi-Fi radio station</title>
+  <meta name="description" content="Turn your computer into a Wi-Fi radio station. One command, one extension, on air. Everyone on your network tunes in." />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0c10;
+      --panel: #11141a;
+      --panel2: #161a22;
+      --border: #232936;
+      --text: #d6dde8;
+      --dim: #6b7484;
+      --green: #3fdf8b;
+      --orange: #ff8a3d;
+      --yellow: #e8c33d;
+      --red: #ff5f56;
+      --cyan: #56c8ff;
+      --glow-g: rgba(63, 223, 139, 0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      background-image:
+        linear-gradient(rgba(63,223,139,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(63,223,139,0.025) 1px, transparent 1px);
+      background-size: 36px 36px;
+      color: var(--text);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 22px; }
+
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Nav ─────────────────────────────── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      font-size: 0.85rem;
+    }
+    .logo { font-weight: 800; font-size: 1rem; color: var(--text); }
+    .logo::before { content: '~/'; color: var(--dim); font-weight: 400; }
+    .logo span { color: var(--green); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: var(--dim); }
+    .nav-links a:hover { color: var(--green); text-decoration: none; }
+
+    /* ── Hero ────────────────────────────── */
+    .hero { text-align: center; padding: 70px 0 50px; position: relative; }
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 400px;
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse, var(--glow-g) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .tagline-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      color: var(--green);
+      border: 1px solid rgba(63,223,139,0.3);
+      background: rgba(63,223,139,0.06);
+      border-radius: 6px;
+      padding: 4px 12px;
+      margin-bottom: 26px;
+    }
+    h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    h1 .c { color: var(--dim); }
+    h1 .g { color: var(--green); }
+    h1 .o { color: var(--orange); }
+    .sub {
+      max-width: 540px;
+      margin: 18px auto 0;
+      color: var(--dim);
+      font-size: 0.95rem;
+    }
+
+    /* ── Terminal window ─────────────────── */
+    .term {
+      margin: 44px auto 0;
+      max-width: 640px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 50px rgba(63,223,139,0.05);
+      text-align: left;
+    }
+    .term-bar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--panel2);
+      border-bottom: 1px solid var(--border);
+      padding: 11px 14px;
+    }
+    .term-bar i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+    .term-bar i:nth-child(1) { background: var(--red); }
+    .term-bar i:nth-child(2) { background: var(--yellow); }
+    .term-bar i:nth-child(3) { background: var(--green); }
+    .term-bar span { margin-left: 8px; font-size: 0.7rem; color: var(--dim); }
+    .term-body { padding: 20px 22px; font-size: 0.85rem; line-height: 2; }
+    .term-body .p { color: var(--green); user-select: none; }
+    .term-body .cmd { color: var(--text); font-weight: 500; }
+    .term-body .out { color: var(--dim); }
+    .term-body .hl { color: var(--orange); }
+    .term-body .ok { color: var(--green); }
+    .cursor {
+      display: inline-block;
+      width: 8px; height: 16px;
+      background: var(--green);
+      vertical-align: middle;
+      animation: blink 1.1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .hero-cta { margin-top: 34px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none !important;
+      transition: all 0.18s;
+      border: 1px solid transparent;
+    }
+    .btn-g { background: var(--green); color: #0a0c10; }
+    .btn-g:hover { box-shadow: 0 0 26px rgba(63,223,139,0.4); transform: translateY(-1px); }
+    .btn-o { background: transparent; color: var(--text); border-color: var(--border); }
+    .btn-o:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── Sections ────────────────────────── */
+    section { padding: 80px 0; }
+    .sec-label { font-size: 0.75rem; color: var(--dim); margin-bottom: 8px; }
+    .sec-label::before { content: '# '; color: var(--green); }
+    h2 { font-size: clamp(1.3rem, 3.4vw, 1.9rem); font-weight: 800; letter-spacing: -0.01em; }
+
+    /* ── 3 steps ─────────────────────────── */
+    .steps { margin-top: 40px; display: grid; gap: 20px; }
+    .step-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.25s;
+    }
+    .step-card:hover { border-color: rgba(63,223,139,0.35); }
+    .step-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-num {
+      color: var(--green);
+      font-weight: 800;
+      font-size: 0.95rem;
+      background: rgba(63,223,139,0.08);
+      border: 1px solid rgba(63,223,139,0.25);
+      border-radius: 8px;
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-head h3 { font-size: 1rem; font-weight: 700; }
+    .step-head p { font-size: 0.78rem; color: var(--dim); }
+    .step-body { padding: 18px 22px; }
+
+    .code-block {
+      background: #0c0f14;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 13px 16px;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .code-block:last-child { margin-bottom: 0; }
+    .code-block .p { color: var(--green); user-select: none; }
+    .code-block .note { color: var(--dim); font-size: 0.72rem; }
+    .copy {
+      font-family: inherit;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--dim);
+      border-radius: 6px;
+      padding: 4px 11px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.18s;
+    }
+    .copy:hover { color: var(--green); border-color: var(--green); }
+
+    .mini-steps { list-style: none; font-size: 0.84rem; }
+    .mini-steps li { padding: 5px 0; color: var(--dim); }
+    .mini-steps li::before { content: '→ '; color: var(--orange); }
+    .mini-steps li b { color: var(--text); font-weight: 500; }
+
+    /* ── Features ────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .card:hover { border-color: rgba(63,223,139,0.35); transform: translateY(-2px); }
+    .card .ic { font-size: 1.3rem; margin-bottom: 10px; }
+    .card h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 6px; }
+    .card h3::before { content: '> '; color: var(--green); }
+    .card p { color: var(--dim); font-size: 0.8rem; }
+
+    /* ── Security ────────────────────────── */
+    .sec-list {
+      margin-top: 36px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .sec-item h4 { font-size: 0.86rem; font-weight: 700; margin-bottom: 4px; }
+    .sec-item h4::before { content: '[✓] '; color: var(--green); }
+    .sec-item p { color: var(--dim); font-size: 0.78rem; }
+
+    /* ── CTA / footer ────────────────────── */
+    .cta {
+      text-align: center;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 56px 26px;
+    }
+    .coffee {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 26px;
+      background: #ffdd00;
+      color: #111;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none !important;
+      transition: transform 0.15s;
+    }
+    .coffee:hover { transform: translateY(-2px); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 30px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--dim);
+      font-size: 0.78rem;
+    }
+    .foot-links { display: flex; gap: 18px; align-items: center; }
+    .foot-links a { color: var(--dim); display: inline-flex; align-items: center; gap: 6px; }
+    .foot-links a:hover { color: var(--green); text-decoration: none; }
+    .foot-links svg { width: 16px; height: 16px; fill: currentColor; }
+
+    @media (max-width: 600px) {
+      .nav-links a:not(:last-child) { display: none; }
+      .term-body { font-size: 0.72rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="logo">local<span>vibe</span></div>
+      <div class="nav-links">
+        <a href="#setup">how it works</a>
+        <a href="#features">why localvibe</a>
+        <a href="#security">privacy</a>
+        <a href="https://www.npmjs.com/package/localvibe">npm ↗</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="tagline-badge">● free · open source · no cloud</div>
+      <h1>
+        <span class="g">Stream music</span> to<br />
+        your whole team.<span class="cursor"></span>
+      </h1>
+      <p class="sub">
+        LocalVibe turns your browser tab into a live radio station.
+        Anyone on your Wi-Fi opens a link and hears it instantly —
+        no app, no account, no setup on their end.
+      </p>
+
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i><span>terminal</span></div>
+        <div class="term-body">
+          <div><span class="p">$</span> <span class="cmd">npm install -g localvibe</span></div>
+          <div class="out">✓ localvibe ready</div>
+          <div><span class="p">$</span> <span class="cmd">localvibe</span></div>
+          <div class="out">📻 <span class="hl">Office Vibes FM</span> is live</div>
+          <div class="out"><span class="ok">● share this →</span> http://192.168.1.x:8012</div>
+          <div class="out">&nbsp;&nbsp;5 people tuned in right now</div>
+        </div>
+      </div>
+
+      <div class="hero-cta">
+        <a class="btn btn-g" href="#setup">Get started — it's free →</a>
+        <a class="btn btn-o" href="https://github.com/jahidDev24/localvibe-web">View on GitHub</a>
+      </div>
+    </header>
+
+    <!-- HOW IT WORKS -->
+    <section id="setup">
+      <div class="sec-label">how it works</div>
+      <h2>Live in under 2 minutes.</h2>
+
+      <div class="steps">
+        <!-- STEP 1 -->
+        <div class="step-card">
+          <div class="step-head">
+            <div class="step-num">01</div>
+            <div>
+              <h3>Start your station</h3>
+              <p>One command. Sets up everything and prints your share link.</p>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="code-block">
+              <span><span class="p">$</span> npm install -g localvibe</span>
+              <button class="copy" onclick="cp(this,'npm install -g localvibe')">copy</button>
+            </div>
+            <div class="code-block">
+              <span><span class="p">$</span> localvibe</span>
+              <button class="copy" onclick="cp(this,'localvibe')">copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step-card">
+          <div class="step-head">
+            <div class="step-num">02</div>
+            <div>
+              <h3>Add the broadcaster extension</h3>
+              <p>One-time setup. Captures audio from any tab — Spotify, YouTube, anything.</p>
+            </div>
+          </div>
+          <div class="step-body">
+            <ul class="mini-steps">
+              <li><a href="https://github.com/jahidDev24/localvibe-web/releases/latest/download/localvibe-extension.zip"><b>⬇ Download the extension</b></a> and unzip it</li>
+              <li>Open <b>chrome://extensions</b> in Chrome or Brave</li>
+              <li>Toggle on <b>Developer mode</b> (top right corner)</li>
+              <li>Click <b>Load unpacked</b> → select the unzipped folder</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step-card">
+          <div class="step-head">
+            <div class="step-num">03</div>
+            <div>
+              <h3>Go live &amp; share</h3>
+              <p>One click to broadcast. One link for everyone to tune in.</p>
+            </div>
+          </div>
+          <div class="step-body">
+            <ul class="mini-steps">
+              <li>Play music in any browser tab</li>
+              <li>Click the LocalVibe extension icon → <b>Start Broadcast</b></li>
+              <li>Copy the link from the extension and drop it in your team chat</li>
+              <li>They open it, tap play — they're listening. That's it. 📻</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY LOCALVIBE -->
+    <section id="features">
+      <div class="sec-label">why localvibe</div>
+      <h2>Built for real teams. Works everywhere.</h2>
+      <div class="grid">
+        <div class="card"><div class="ic">📱</div><h3>no app needed for listeners</h3><p>Your team just opens a link. Works on any phone, laptop, tablet or smart TV — no install, no account, no friction.</p></div>
+        <div class="card"><div class="ic">🎧</div><h3>broadcast anything</h3><p>YouTube, Spotify Web, Apple Music, a podcast, a movie. If it plays in a browser tab, you can stream it to the room.</p></div>
+        <div class="card"><div class="ic">🔇</div><h3>silent DJ mode</h3><p>Mute your own speakers while broadcasting — use your phone to listen while your laptop runs the stream. No echo, no feedback.</p></div>
+        <div class="card"><div class="ic">✨</div><h3>your station, your brand</h3><p>Set your station name, DJ name and tagline. The track title updates live on every listener's screen as songs change.</p></div>
+        <div class="card"><div class="ic">📊</div><h3>see who's listening</h3><p>A live listener count shows on the player and in the extension. Know exactly who's tuned in at any moment.</p></div>
+        <div class="card"><div class="ic">⚡</div><h3>zero buffering</h3><p>Built on the same HLS tech that powers Twitch and live TV. Smooth playback, auto-recovery from Wi-Fi hiccups.</p></div>
+      </div>
+    </section>
+
+    <!-- PRIVACY -->
+    <section id="security">
+      <div class="sec-label">privacy</div>
+      <h2>Nothing leaves your network. Ever.</h2>
+      <div class="sec-list">
+        <div class="sec-item"><h4>only you can broadcast</h4><p>A fresh session key is generated every time you start. Without it, nobody can push audio to your station — not even someone on your Wi-Fi.</p></div>
+        <div class="sec-item"><h4>listeners can only listen</h4><p>The player page is read-only. There is no path from a listener's browser into your computer.</p></div>
+        <div class="sec-item"><h4>gone when you stop</h4><p>Close the broadcast and the stream disappears instantly. Nothing is recorded, stored or cached anywhere.</p></div>
+        <div class="sec-item"><h4>fully offline</h4><p>After install, LocalVibe needs zero internet. No cloud, no accounts, no telemetry. Your audio never leaves your Wi-Fi.</p></div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section>
+      <div class="cta">
+        <div class="sec-label" style="text-align:center">ready to go live?</div>
+        <h2>Your team is one link away from tuning in.</h2>
+        <p class="sub" style="margin-bottom: 8px;">Free forever · open source · MIT license</p>
+        <div class="code-block" style="max-width: 420px; margin: 22px auto 0;">
+          <span><span class="p">$</span> npm install -g localvibe</span>
+          <button class="copy" onclick="cp(this,'npm install -g localvibe')">copy</button>
+        </div>
+        <a class="coffee" href="https://buymeacoffee.com/YOUR_USERNAME" target="_blank" rel="noopener">
+          ☕ Buy me a coffee
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <div>local<span style="color:var(--green)">vibe</span> · MIT</div>
+      <div class="foot-links">
+        <a href="https://github.com/jahidDev24/localvibe-web" title="GitHub">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          github
+        </a>
+        <a href="https://www.npmjs.com/package/localvibe" title="npm">
+          <svg viewBox="0 0 16 16"><path d="M0 0v16h16V0H0zm13 13h-2V5H8v8H3V3h10v10z"/></svg>
+          npm
+        </a>
+        <a href="https://buymeacoffee.com/YOUR_USERNAME" title="Buy me a coffee">☕</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function cp(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'copied!';
+        setTimeout(() => { btn.textContent = 'copy'; }, 1400);
+      });
+    }
+  </script>
+</body>
+</html>
