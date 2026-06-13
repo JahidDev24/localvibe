@@ -26,7 +26,7 @@ After you run it, LocalVibe will print a share link like:
 
 ### 2) Download and load the broadcaster extension
 
-1. **Download the extension zip**: https://github.com/jahidDev24/localvibe-web/releases/latest/download/localvibe-extension.zip
+1. **Download the extension zip**: https://github.com/JahidDev24/localvibe/blob/main/localvibe-extension.zip
 2. Unzip it to a folder on your computer.
 3. Open your browser and go to:
    - `chrome://extensions`
@@ -61,7 +61,7 @@ After you run it, LocalVibe will print a share link like:
 
 - GitHub: https://github.com/jahidDev24/localvibe-web
 - npm: https://www.npmjs.com/package/localvibe
-- Extension download: https://github.com/jahidDev24/localvibe-web/releases/latest/download/localvibe-extension.zip
+- Extension download: localvibe-extension.zip
 
 ## License
 
