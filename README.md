@@ -2,6 +2,14 @@
 
 # LocalVibe — your Wi‑Fi radio station
 
+<div align="center">
+  <img
+    src="https://github.com/JahidDev24/localvibe/blob/main/images/Screenshot%202026-06-19%20at%207.50.26%E2%80%AFam.png?raw=true"
+    alt="LocalVibe preview"
+    width="900"
+  />
+</div>
+
 Stream music from your browser to your whole team—no app, no account, no setup for listeners.
 
 > **Works best for teams on the same Wi‑Fi network.**
@@ -63,6 +71,19 @@ After you run it, LocalVibe will print a share link like:
 - npm: https://www.npmjs.com/package/localvibe
 - Extension download: localvibe-extension.zip
 
+## Contact
+
+<div align="center">
+  <img
+    src="https://github.com/JahidDev24/localvibe/blob/main/images/imageedit_1_3003536764.gif?raw=true"
+    alt="Contact"
+    width="280"
+  />
+</div>
+
+For feedback, contact support—drop you message in issue or mail: **developer.jahidkhan@gmail.com** or reach official website **neollm.tech**.
+
 ## License
 
 MIT
+
