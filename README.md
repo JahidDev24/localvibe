@@ -10,7 +10,9 @@
   />
 </div>
 
-Stream music from your browser to your whole team—no app, no account, no setup for listeners.
+**Live demo:** https://jahiddev24.github.io/localvibe/  ·  https://localvibe.neollm.tech
+
+Stream music from your browser
 
 > **Works best for teams on the same Wi‑Fi network.**
 
